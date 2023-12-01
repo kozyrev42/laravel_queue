@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Mail\MobileEmail;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\WelcomeEmail;
 
 class RegisterController extends Controller
 {
@@ -27,6 +30,11 @@ class RegisterController extends Controller
             'email' => $request['email'],
             'password' => Hash::make($request['password']),
         ]);
+
+        // отправка 2-х письма, при успешной регистрации
+        // отправка 2-х email - примерно 4 секунды
+        Mail::to($user->email)->send(new WelcomeEmail($user));
+        Mail::to($user->email)->send(new MobileEmail($user));
 
         return response(['user' => $user], 201);
     }
