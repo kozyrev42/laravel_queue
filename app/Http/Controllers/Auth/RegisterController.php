@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\WelcomeEmail;
+use App\Jobs\SendWelcomeEmailJob;
+use App\Jobs\SendMobileEmailJob;
 
 class RegisterController extends Controller
 {
@@ -33,8 +35,13 @@ class RegisterController extends Controller
 
         // отправка 2-х письма, при успешной регистрации
         // отправка 2-х email - примерно 4 секунды
-        Mail::to($user->email)->send(new WelcomeEmail($user));
-        Mail::to($user->email)->send(new MobileEmail($user));
+        // синхронная отправка сообщений
+        //Mail::to($user->email)->send(new WelcomeEmail($user));
+        //Mail::to($user->email)->send(new MobileEmail($user));
+
+        // асинхронная отправка, с помощью очередей
+        SendWelcomeEmailJob::dispatch($user);
+        SendMobileEmailJob::dispatch($user);
 
         return response(['user' => $user], 201);
     }

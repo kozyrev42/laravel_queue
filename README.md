@@ -18,3 +18,24 @@
    MAIL_ENCRYPTION=ssl
    MAIL_FROM_ADDRESS=kozyrevsasha@mail.ru
    MAIL_FROM_NAME="${APP_NAME}"
+
+4. Сделал отправку писем асинхронно, с помощью jobs, и очередей.
+
+- Настройте драйвер очереди в .env:
+  QUEUE_CONNECTION=database
+
+- таблица для хранения задач очереди:
+  php artisan queue:table
+
+  сгенерится миграция: 2023_12_01_082436_create_jobs_table.php
+
+  накат миграции:php artisan migrate
+
+- создал класс job "SendWelcomeEmailJob", в нем прописываем логику отправки сообщения
+  php artisan make:job SendWelcomeEmailJob
+
+- отправляем данные в SendWelcomeEmailJob, для последующей отправки сообщения
+  SendWelcomeEmailJob::dispatch($user);
+
+- запуск процесса для прослушки очередей:
+  php artisan queue:work
